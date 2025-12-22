@@ -35,7 +35,7 @@ export default async function CoursePage({ params }: { params: { id: string } })
   const isEnrolled = session?.user && course.enrollments && course.enrollments.length > 0
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-white">
       <Header />
       
       <div className="container mx-auto px-4 py-8">

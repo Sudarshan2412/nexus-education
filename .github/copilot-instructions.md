@@ -1,4 +1,4 @@
-# Learning Management System Project
+# Nexus-Education Project
 
 ## Project Overview
 A comprehensive learning management system with user authentication, video uploads, code repositories, course materials, exercises/MCQ sections, personalized home page, course search/filter, and user profiles.

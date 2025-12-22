@@ -9,17 +9,17 @@ export function Header() {
   const pathname = usePathname()
 
   return (
-    <header className="border-b bg-white shadow-sm">
+    <header className="border-b bg-black shadow-sm">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          <Link href="/" className="text-2xl font-bold text-primary-600">
-            LMS
+          <Link href="/" className="text-2xl font-bold text-white">
+            Nexus-Education
           </Link>
 
           <nav className="hidden md:flex items-center gap-6">
             <Link 
               href="/courses" 
-              className={`hover:text-primary-600 transition ${pathname === '/courses' ? 'text-primary-600 font-semibold' : ''}`}
+              className={`text-white hover:text-primary-400 transition ${pathname === '/courses' ? 'text-primary-400 font-semibold' : ''}`}
             >
               Courses
             </Link>
@@ -27,18 +27,16 @@ export function Header() {
               <>
                 <Link 
                   href="/my-learning" 
-                  className={`hover:text-primary-600 transition ${pathname === '/my-learning' ? 'text-primary-600 font-semibold' : ''}`}
+                  className={`text-white hover:text-primary-400 transition ${pathname === '/my-learning' ? 'text-primary-400 font-semibold' : ''}`}
                 >
                   My Learning
                 </Link>
-                {(session.user.role === 'INSTRUCTOR' || session.user.role === 'ADMIN') && (
-                  <Link 
-                    href="/instructor/courses" 
-                    className={`hover:text-primary-600 transition ${pathname?.startsWith('/instructor') ? 'text-primary-600 font-semibold' : ''}`}
-                  >
-                    Teach
-                  </Link>
-                )}
+                <Link 
+                  href="/instructor/courses" 
+                  className={`text-white hover:text-primary-400 transition ${pathname?.startsWith('/instructor') ? 'text-primary-400 font-semibold' : ''}`}
+                >
+                  Teach
+                </Link>
               </>
             )}
           </nav>
@@ -48,7 +46,7 @@ export function Header() {
               <>
                 <Link 
                   href="/profile" 
-                  className="flex items-center gap-2 hover:text-primary-600"
+                  className="flex items-center gap-2 text-white hover:text-primary-400"
                 >
                   <div className="w-8 h-8 rounded-full bg-primary-600 text-white flex items-center justify-center">
                     {session.user.name?.[0] || session.user.email[0].toUpperCase()}
@@ -57,7 +55,7 @@ export function Header() {
                 </Link>
                 <button
                   onClick={() => signOut()}
-                  className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="px-4 py-2 text-sm border border-gray-600 text-white rounded-lg hover:bg-gray-800"
                 >
                   Sign Out
                 </button>
@@ -66,7 +64,7 @@ export function Header() {
               <>
                 <Link 
                   href="/auth/signin" 
-                  className="px-4 py-2 text-sm hover:text-primary-600"
+                  className="px-4 py-2 text-sm text-white hover:text-primary-400"
                 >
                   Sign In
                 </Link>

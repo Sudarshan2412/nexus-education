@@ -12,7 +12,6 @@ export default function SignUpPage() {
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'STUDENT' as 'STUDENT' | 'INSTRUCTOR',
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -38,7 +37,7 @@ export default function SignUpPage() {
         name: formData.name,
         email: formData.email,
         password: formData.password,
-        role: formData.role,
+        role: 'INSTRUCTOR',
       })
 
       router.push('/auth/signin?registered=true')
@@ -71,7 +70,7 @@ export default function SignUpPage() {
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               required
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 bg-white"
               placeholder="John Doe"
             />
           </div>
@@ -86,7 +85,7 @@ export default function SignUpPage() {
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               required
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 bg-white"
               placeholder="you@example.com"
             />
           </div>
@@ -101,7 +100,7 @@ export default function SignUpPage() {
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               required
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 bg-white"
               placeholder="••••••••"
             />
           </div>
@@ -116,35 +115,9 @@ export default function SignUpPage() {
               value={formData.confirmPassword}
               onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
               required
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 bg-white"
               placeholder="••••••••"
             />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2">I want to</label>
-            <div className="flex gap-4">
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  value="STUDENT"
-                  checked={formData.role === 'STUDENT'}
-                  onChange={(e) => setFormData({ ...formData, role: e.target.value as 'STUDENT' })}
-                  className="mr-2"
-                />
-                Learn
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  value="INSTRUCTOR"
-                  checked={formData.role === 'INSTRUCTOR'}
-                  onChange={(e) => setFormData({ ...formData, role: e.target.value as 'INSTRUCTOR' })}
-                  className="mr-2"
-                />
-                Teach
-              </label>
-            </div>
           </div>
 
           <button

@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
         name,
         email,
         password: hashedPassword,
-        role: role || 'STUDENT',
+        role: role || 'INSTRUCTOR',
       }
     })
 

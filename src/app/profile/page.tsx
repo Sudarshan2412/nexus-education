@@ -43,7 +43,7 @@ export default async function ProfilePage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-white">
       <Header />
       
       <div className="container mx-auto px-4 py-8">
@@ -79,9 +79,8 @@ export default async function ProfilePage() {
           </div>
         </div>
 
-        {/* Created Courses (for instructors) */}
-        {(user.role === 'INSTRUCTOR' || user.role === 'ADMIN') && (
-          <div>
+        {/* Created Courses */}
+        <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-2xl font-bold">My Courses</h2>
               <a
@@ -103,7 +102,7 @@ export default async function ProfilePage() {
               )}
             </div>
           </div>
-        )}
+        </div>
       </div>
     </main>
   )

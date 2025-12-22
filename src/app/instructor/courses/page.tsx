@@ -10,8 +10,8 @@ export const dynamic = 'force-dynamic'
 export default async function InstructorCoursesPage() {
   const session = await getServerSession(authOptions)
 
-  if (!session?.user || (session.user.role !== 'INSTRUCTOR' && session.user.role !== 'ADMIN')) {
-    redirect('/')
+  if (!session?.user) {
+    redirect('/auth/signin')
   }
 
   const courses = await prisma.course.findMany({
@@ -29,7 +29,7 @@ export default async function InstructorCoursesPage() {
   })
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-white">
       <Header />
       
       <div className="container mx-auto px-4 py-8">

@@ -16,18 +16,18 @@ export default async function CoursesPage() {
   })
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-white">
       <Header />
       
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-4">All Courses</h1>
-          <p className="text-gray-600">Explore our collection of courses</p>
+          <h1 className="text-4xl font-bold mb-4 text-gray-900">All Courses</h1>
+          <p className="text-gray-700">Explore our collection of courses</p>
         </div>
 
         {/* Filters */}
         <div className="mb-8 flex gap-4 flex-wrap">
-          <select className="px-4 py-2 border rounded-lg">
+          <select className="px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 font-medium">
             <option value="">All Categories</option>
             <option value="Web Development">Web Development</option>
             <option value="Data Science">Data Science</option>
@@ -35,14 +35,14 @@ export default async function CoursesPage() {
             <option value="Cloud Computing">Cloud Computing</option>
           </select>
           
-          <select className="px-4 py-2 border rounded-lg">
+          <select className="px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 font-medium">
             <option value="">All Levels</option>
             <option value="BEGINNER">Beginner</option>
             <option value="INTERMEDIATE">Intermediate</option>
             <option value="ADVANCED">Advanced</option>
           </select>
 
-          <select className="px-4 py-2 border rounded-lg">
+          <select className="px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 font-medium">
             <option value="">Sort By</option>
             <option value="newest">Newest</option>
             <option value="popular">Most Popular</option>
@@ -58,7 +58,7 @@ export default async function CoursesPage() {
               <CourseCard key={course.id} {...course} />
             ))
           ) : (
-            <div className="col-span-full text-center py-12 text-gray-500">
+            <div className="col-span-full text-center py-12 text-gray-700 font-medium">
               No courses available yet. Check back soon!
             </div>
           )}

@@ -4,7 +4,7 @@ import { CourseCard } from '@/components/CourseCard'
 
 export default function Home() {
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen bg-white">
       <Header />
       
       <div className="container mx-auto px-4 py-8">

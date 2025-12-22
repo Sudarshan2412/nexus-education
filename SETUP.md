@@ -1,4 +1,4 @@
-# Getting Started with the Learning Management System
+# Getting Started with Nexus-Education
 
 ## Initial Setup
 

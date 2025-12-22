@@ -1,4 +1,4 @@
-# Learning Management System
+# Nexus-Education
 
 A comprehensive learning management system built with Next.js 14, featuring video uploads, code repositories, course materials, exercises, and personalized learning experiences.
 
