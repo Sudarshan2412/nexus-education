@@ -34,13 +34,13 @@ export function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group">
             <motion.div
-              className="w-10 h-10 bg-gradient-to-br from-primary to-neon-purple rounded-xl flex items-center justify-center"
+              className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center"
               whileHover={{ rotate: 360, scale: 1.1 }}
               transition={{ duration: 0.6 }}
             >
               <GraduationCap className="w-6 h-6 text-primary-foreground" />
             </motion.div>
-            <span className="font-display font-bold text-xl uppercase tracking-tight hidden sm:block gradient-text">
+            <span className="font-display font-bold text-xl uppercase tracking-tight hidden sm:block text-primary">
               Nexus Edu
             </span>
           </Link>
