@@ -23,6 +23,10 @@ model User {
   coursesCreated Course[]  @relation("CourseInstructor")
   enrollments   Enrollment[]
   exerciseSubmissions ExerciseSubmission[]
+  videoProgress VideoProgress[]
+  reviews       Review[]
+  certificates  Certificate[]
+  payments      Payment[]
 }
 
 model Account {
@@ -79,6 +83,9 @@ model Course {
   exercises   Exercise[]
   enrollments Enrollment[]
   codeRepos   CodeRepository[]
+  reviews     Review[]
+  certificates Certificate[]
+  payments    Payment[]
 }
 
 model Video {
@@ -94,6 +101,7 @@ model Video {
 
   course   Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
   materials Material[]
+  progress VideoProgress[]
 
   @@index([courseId])
 }
@@ -178,6 +186,80 @@ model Enrollment {
   @@unique([userId, courseId])
   @@index([userId])
   @@index([courseId])
+}
+
+model VideoProgress {
+  id           String   @id @default(cuid())
+  userId       String
+  videoId      String
+  completed    Boolean  @default(false)
+  lastPosition Int      @default(0) // in seconds
+  watchedAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  video Video @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, videoId])
+  @@index([userId])
+  @@index([videoId])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  rating    Int      // 1-5 stars
+  comment   String?  @db.Text
+  userId    String
+  courseId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@index([userId])
+  @@index([courseId])
+}
+
+model Certificate {
+  id             String   @id @default(cuid())
+  userId         String
+  courseId       String
+  certificateUrl String?
+  issuedAt       DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@index([userId])
+  @@index([courseId])
+}
+
+model Payment {
+  id              String        @id @default(cuid())
+  userId          String
+  courseId        String
+  amount          Float
+  currency        String        @default("INR")
+  status          PaymentStatus @default(PENDING)
+  stripePaymentId String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([courseId])
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
 }
 
 enum Role {

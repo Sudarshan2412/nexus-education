@@ -4,6 +4,13 @@ export { Header } from './layout/Header'
 // Course Components
 export { CourseCard } from './courses/CourseCard'
 export { VideoUpload } from './courses/VideoUpload'
+export { EnrollButton } from './courses/EnrollButton'
+
+// Exercise Components
+export { MCQQuestion } from './exercises/MCQQuestion'
+
+// Progress Components
+export { ProgressTracker } from './progress/ProgressTracker'
 
 // Home Page Components
 export { Hero } from './home/Hero'
