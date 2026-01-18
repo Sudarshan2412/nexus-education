@@ -11,18 +11,29 @@ export default function CoursesPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [selectedLevel, setSelectedLevel] = useState('All')
+  const [selectedRating, setSelectedRating] = useState('0')
   const [loading, setLoading] = useState(true)
 
   const categories = ['All', 'Web Development', 'Data Science', 'Mobile Apps', 'Cloud Computing', 'AI & Machine Learning']
   const levels = ['All', 'BEGINNER', 'INTERMEDIATE', 'ADVANCED']
+  const ratings = [
+    { label: 'All Ratings', value: '0' },
+    { label: '4.0 & Up', value: '4' },
+    { label: '3.0 & Up', value: '3' },
+  ]
 
   useEffect(() => {
     fetchCourses()
-  }, [])
+  }, [selectedCategory, selectedLevel])
 
   const fetchCourses = async () => {
     try {
-      const res = await fetch('/api/courses')
+      setLoading(true)
+      const url = new URL('/api/courses', window.location.origin)
+      if (selectedCategory !== 'All') url.searchParams.append('category', selectedCategory)
+      if (selectedLevel !== 'All') url.searchParams.append('level', selectedLevel)
+
+      const res = await fetch(url.toString())
       const data = await res.json()
       setCourses(data)
     } catch (error) {
@@ -35,9 +46,11 @@ export default function CoursesPage() {
   const filteredCourses = courses.filter(course => {
     const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       course.description?.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesCategory = selectedCategory === 'All' || course.category === selectedCategory
-    const matchesLevel = selectedLevel === 'All' || course.level === selectedLevel
-    return matchesSearch && matchesCategory && matchesLevel
+
+    const matchesRating = parseFloat(selectedRating) === 0 ||
+      (course.avgRating >= parseFloat(selectedRating))
+
+    return matchesSearch && matchesRating
   })
 
   return (
@@ -82,7 +95,7 @@ export default function CoursesPage() {
             transition={{ delay: 0.3 }}
           >
             {/* Search Bar */}
-            <div className="relative mb-6">
+            <div className="relative mb-8">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <input
                 type="text"
@@ -94,46 +107,72 @@ export default function CoursesPage() {
             </div>
 
             {/* Filters */}
-            <div className="flex flex-col md:flex-row gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Category Filter */}
-              <div className="flex-1">
-                <label className="block text-sm font-display font-bold uppercase tracking-wider text-muted-foreground mb-2">
-                  <Filter className="w-4 h-4 inline mr-2" />
+              <div>
+                <label className="block text-[10px] font-display font-bold uppercase tracking-widest text-muted-foreground mb-3 px-1">
                   Category
                 </label>
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full px-4 py-3 bg-secondary/50 border border-border/50 rounded-lg text-foreground focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all font-display cursor-pointer"
+                  className="w-full px-4 py-3 bg-secondary/30 border border-white/5 rounded-xl text-sm text-foreground focus:outline-none focus:border-primary/50 transition-all font-semibold"
                 >
                   {categories.map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
+                    <option key={cat} value={cat}>{cat} Courses</option>
                   ))}
                 </select>
               </div>
 
               {/* Level Filter */}
-              <div className="flex-1">
-                <label className="block text-sm font-display font-bold uppercase tracking-wider text-muted-foreground mb-2">
-                  Level
+              <div>
+                <label className="block text-[10px] font-display font-bold uppercase tracking-widest text-muted-foreground mb-3 px-1">
+                  Skill Level
                 </label>
                 <select
                   value={selectedLevel}
                   onChange={(e) => setSelectedLevel(e.target.value)}
-                  className="w-full px-4 py-3 bg-secondary/50 border border-border/50 rounded-lg text-foreground focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all font-display cursor-pointer"
+                  className="w-full px-4 py-3 bg-secondary/30 border border-white/5 rounded-xl text-sm text-foreground focus:outline-none focus:border-primary/50 transition-all font-semibold"
                 >
                   {levels.map(level => (
-                    <option key={level} value={level}>{level}</option>
+                    <option key={level} value={level}>{level === 'All' ? 'All Levels' : level}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Rating Filter */}
+              <div>
+                <label className="block text-[10px] font-display font-bold uppercase tracking-widest text-muted-foreground mb-3 px-1">
+                  Minimum Rating
+                </label>
+                <select
+                  value={selectedRating}
+                  onChange={(e) => setSelectedRating(e.target.value)}
+                  className="w-full px-4 py-3 bg-secondary/30 border border-white/5 rounded-xl text-sm text-foreground focus:outline-none focus:border-primary/50 transition-all font-semibold"
+                >
+                  {ratings.map(rating => (
+                    <option key={rating.value} value={rating.value}>{rating.label}</option>
                   ))}
                 </select>
               </div>
             </div>
 
             {/* Results Count */}
-            <div className="mt-4 pt-4 border-t border-border/50">
-              <p className="text-sm text-muted-foreground font-display">
-                Found <span className="text-primary font-bold">{filteredCourses.length}</span> courses
+            <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
+              <p className="text-[10px] text-muted-foreground font-display font-bold uppercase tracking-widest">
+                Showing <span className="text-primary">{filteredCourses.length}</span> Results
               </p>
+              <button
+                onClick={() => {
+                  setSelectedCategory('All');
+                  setSelectedLevel('All');
+                  setSelectedRating('0');
+                  setSearchQuery('');
+                }}
+                className="text-[10px] text-red-400 hover:text-red-300 font-bold uppercase tracking-widest transition-colors"
+              >
+                Reset Filters
+              </button>
             </div>
           </motion.div>
 

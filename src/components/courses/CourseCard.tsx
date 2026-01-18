@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { GraduationCap, Clock, Users } from 'lucide-react'
+import { GraduationCap, Clock, Users, Star } from 'lucide-react'
 
 interface CourseCardProps {
   id: string
@@ -13,8 +13,9 @@ interface CourseCardProps {
     name: string | null
   }
   category: string
-  price: number
   level: string
+  avgRating?: number
+  totalReviews?: number
   index?: number
 }
 
@@ -31,8 +32,9 @@ export function CourseCard({
   thumbnail,
   instructor,
   category,
-  price,
   level,
+  avgRating,
+  totalReviews,
   index = 0
 }: CourseCardProps) {
   const colors = levelColors[level.toUpperCase()] || levelColors['BEGINNER']
@@ -80,19 +82,6 @@ export function CourseCard({
               </div>
             )}
 
-            {/* Price Badge */}
-            <div className="absolute top-4 right-4">
-              <motion.div
-                className={`px-4 py-2 rounded-full font-display font-bold text-sm ${price === 0
-                    ? 'bg-neon-green/20 text-neon-green border border-neon-green/50'
-                    : 'bg-primary/20 text-primary border border-primary/50'
-                  } backdrop-blur-xl`}
-                whileHover={{ scale: 1.1 }}
-              >
-                {price === 0 ? 'FREE' : `₹${price}`}
-              </motion.div>
-            </div>
-
             {/* Gradient Overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-80" />
           </div>
@@ -136,18 +125,22 @@ export function CourseCard({
                     {instructor.name?.charAt(0) || 'I'}
                   </span>
                 </motion.div>
-                <span className="text-xs text-muted-foreground font-medium">
-                  {instructor.name || 'Instructor'}
-                </span>
+                <div className="flex flex-col">
+                  <span className="text-[10px] text-muted-foreground font-medium">
+                    {instructor.name || 'Instructor'}
+                  </span>
+                  {avgRating !== undefined && avgRating > 0 && (
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <Star className="w-2.5 h-2.5 text-yellow-500 fill-yellow-500" />
+                      <span className="text-[10px] font-bold text-white">{avgRating.toFixed(1)}</span>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              <div className="flex items-center gap-3 text-muted-foreground text-xs">
+              <div className="flex items-center gap-3 text-muted-foreground text-[10px] font-bold uppercase tracking-widest">
                 <span className="flex items-center gap-1">
-                  <Clock className="w-3 h-3" />
-                  12h
-                </span>
-                <span className="flex items-center gap-1">
-                  <Users className="w-3 h-3" />
+                  <Users className="w-3 h-3 text-primary" />
                   234
                 </span>
               </div>
@@ -163,6 +156,6 @@ export function CourseCard({
           />
         </div>
       </Link>
-    </motion.div>
+    </motion.div >
   )
 }

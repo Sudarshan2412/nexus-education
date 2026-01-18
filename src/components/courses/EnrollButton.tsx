@@ -8,11 +8,10 @@ import { useRouter } from 'next/navigation'
 
 interface EnrollButtonProps {
     courseId: string
-    coursePrice: number
     className?: string
 }
 
-export function EnrollButton({ courseId, coursePrice, className = '' }: EnrollButtonProps) {
+export function EnrollButton({ courseId, className = '' }: EnrollButtonProps) {
     const { data: session, status } = useSession()
     const router = useRouter()
     const [enrolled, setEnrolled] = useState(false)
@@ -153,9 +152,7 @@ export function EnrollButton({ courseId, coursePrice, className = '' }: EnrollBu
                 {processing ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
                 ) : (
-                    <>
-                        {coursePrice === 0 ? 'Enroll for FREE' : `Enroll for ₹${coursePrice}`}
-                    </>
+                    <>Enroll Now</>
                 )}
             </button>
         </motion.div>

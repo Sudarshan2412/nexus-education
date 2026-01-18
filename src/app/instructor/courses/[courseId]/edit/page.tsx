@@ -2,9 +2,9 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { Header } from "@/components/Header";
+import { Header } from "@/components/layout/Header";
 import Link from "next/link";
-import { ArrowLeft, LayoutDashboard, ListVideo } from "lucide-react";
+import { ArrowLeft, LayoutDashboard, Settings } from "lucide-react";
 import { EditClient } from "./_components/EditClient";
 
 export default async function CourseEditPage({
@@ -62,48 +62,59 @@ export default async function CourseEditPage({
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
                     {/* Left Column - Course Details */}
-                    <div className="space-y-6">
+                    <div className="xl:col-span-1 space-y-6">
                         <div className="flex items-center gap-x-2 text-xl font-bold mb-6 text-gray-400 uppercase tracking-widest">
-                            <LayoutDashboard className="w-6 h-6 text-brand-blue" />
-                            <h2>Customize Course</h2>
+                            <LayoutDashboard className="w-6 h-6 text-primary" />
+                            <h2>General Info</h2>
                         </div>
 
                         {/* Title */}
-                        <div className="glass-card p-6 fade-in">
-                            <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">
+                        <div className="glass-card p-6">
+                            <h3 className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-3">
                                 Course Title
                             </h3>
-                            <p className="text-white text-lg font-medium">{course.title}</p>
+                            <p className="text-white text-lg font-bold uppercase tracking-tight">{course.title}</p>
                         </div>
 
                         {/* Description */}
-                        <div className="glass-card p-6 fade-in">
-                            <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">
+                        <div className="glass-card p-6">
+                            <h3 className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-3">
                                 Description
                             </h3>
-                            <p className="text-gray-400 italic text-sm">
-                                {course.description || "No description yet"}
+                            <p className="text-gray-400 text-sm leading-relaxed">
+                                {course.description || "No description provided."}
                             </p>
                         </div>
 
-                        {/* Thumbnail */}
-                        <div className="glass-card p-6 fade-in">
-                            <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">
-                                Course Thumbnail
+                        {/* Stats */}
+                        <div className="glass-card p-6">
+                            <h3 className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-6">
+                                Content Stats
                             </h3>
-                            <div className="h-40 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center text-gray-500">
-                                <span className="text-xs uppercase tracking-wider">No image uploaded</span>
+                            <div className="grid grid-cols-1 gap-4">
+                                <div className="p-4 bg-white/5 rounded-2xl border border-white/5 flex items-center justify-between">
+                                    <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Total Videos</p>
+                                    <p className="text-2xl font-display font-bold text-primary">{course.videos.length}</p>
+                                </div>
+                                <div className="p-4 bg-white/5 rounded-2xl border border-white/5 flex items-center justify-between">
+                                    <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Learning Materials</p>
+                                    <p className="text-2xl font-display font-bold text-neon-purple">{course.materials.length}</p>
+                                </div>
+                                <div className="p-4 bg-white/5 rounded-2xl border border-white/5 flex items-center justify-between">
+                                    <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Quiz Exercises</p>
+                                    <p className="text-2xl font-display font-bold text-neon-green">{course.exercises.length}</p>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Right Column - Videos */}
-                    <div className="space-y-6">
+                    {/* Right Column - Content Management */}
+                    <div className="xl:col-span-2 space-y-6">
                         <div className="flex items-center gap-x-2 text-xl font-bold mb-6 text-gray-400 uppercase tracking-widest">
-                            <ListVideo className="w-6 h-6 text-brand-blue" />
-                            <h2>Course Videos</h2>
+                            <Settings className="w-6 h-6 text-primary" />
+                            <h2>Content Management</h2>
                         </div>
 
                         <EditClient course={course} />

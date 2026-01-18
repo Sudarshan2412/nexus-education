@@ -5,6 +5,8 @@ export { Header } from './layout/Header'
 export { CourseCard } from './courses/CourseCard'
 export { VideoUpload } from './courses/VideoUpload'
 export { EnrollButton } from './courses/EnrollButton'
+export { MaterialUpload } from './courses/MaterialUpload'
+export { CertificateButton } from './courses/CertificateButton'
 
 // Exercise Components
 export { MCQQuestion } from './exercises/MCQQuestion'
