@@ -1,17 +1,15 @@
 import { notFound } from 'next/navigation'
-import { Header } from '@/components/Header'
+import { Header } from '@/components/layout/Header'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import Link from 'next/link'
-import { EnrollButton } from '@/components/EnrollButton'
-import { ProgressBar } from '@/components/ProgressBar'
 
 export const dynamic = 'force-dynamic'
 
 export default async function CoursePage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions)
-  
+
   const course = await prisma.course.findUnique({
     where: { id: params.id },
     include: {
@@ -39,7 +37,7 @@ export default async function CoursePage({ params }: { params: { id: string } })
   return (
     <main className="min-h-screen bg-white">
       <Header />
-      
+
       <div className="container mx-auto px-4 py-8">
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content */}
@@ -53,10 +51,10 @@ export default async function CoursePage({ params }: { params: { id: string } })
                   {course.level}
                 </span>
               </div>
-              
+
               <h1 className="text-4xl font-bold mb-4">{course.title}</h1>
               <p className="text-gray-600 mb-6">{course.description}</p>
-              
+
               <div className="flex items-center gap-4 text-sm text-gray-600">
                 <span>By {course.instructor.name}</span>
                 <span>•</span>
@@ -69,14 +67,6 @@ export default async function CoursePage({ params }: { params: { id: string } })
             {/* Course Content */}
             {isEnrolled && (
               <>
-                {/* Progress Bar */}
-                {course.enrollments?.[0] && (
-                  <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-                    <h2 className="text-xl font-bold mb-4">Your Progress</h2>
-                    <ProgressBar progress={course.enrollments[0].progress} />
-                  </div>
-                )}
-
                 <div className="bg-white rounded-lg shadow-md p-6 mb-6">
                   <h2 className="text-2xl font-bold mb-4">Course Content</h2>
                   <div className="space-y-2">
@@ -129,11 +119,6 @@ export default async function CoursePage({ params }: { params: { id: string } })
           {/* Sidebar */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow-md p-6 sticky top-4">
-              <div className="mb-6">
-                <div className="text-3xl font-bold text-primary-600 mb-2">
-                  {course.price === 0 ? 'Free' : `$${course.price}`}
-                </div>
-              </div>
 
               {session?.user ? (
                 isEnrolled ? (
@@ -149,7 +134,9 @@ export default async function CoursePage({ params }: { params: { id: string } })
                     </Link>
                   </div>
                 ) : (
-                  <EnrollButton courseId={course.id} />
+                  <button className="w-full bg-primary-600 text-white py-3 rounded-lg hover:bg-primary-700 transition">
+                    Enroll Now
+                  </button>
                 )
               ) : (
                 <Link

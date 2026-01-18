@@ -1,68 +1,56 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
-// Add a video to course
 export async function POST(
-  req: NextRequest,
-  { params }: { params: { courseId: string } }
+    req: Request,
+    { params }: { params: { courseId: string } }
 ) {
-  try {
-    const session = await getServerSession(authOptions)
+    try {
+        const session = await getServerSession(authOptions);
+        const { title, url, duration } = await req.json();
 
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+        if (!session || (session.user.role !== "INSTRUCTOR" && session.user.role !== "ADMIN")) {
+            return new NextResponse("Unauthorized", { status: 401 });
+        }
+
+        const courseOwner = await prisma.course.findUnique({
+            where: {
+                id: params.courseId,
+                instructorId: session.user.id,
+            },
+        });
+
+        if (!courseOwner && session.user.role !== "ADMIN") {
+            return new NextResponse("Unauthorized", { status: 401 });
+        }
+
+        // Get the last video order
+        const lastVideo = await prisma.video.findFirst({
+            where: {
+                courseId: params.courseId,
+            },
+            orderBy: {
+                order: "desc",
+            },
+        });
+
+        const newPosition = lastVideo ? lastVideo.order + 1 : 1;
+
+        const video = await prisma.video.create({
+            data: {
+                title,
+                url,
+                duration: duration || 0,
+                courseId: params.courseId,
+                order: newPosition,
+            },
+        });
+
+        return NextResponse.json(video);
+    } catch (error) {
+        console.error("[VIDEOS]", error);
+        return new NextResponse("Internal Error", { status: 500 });
     }
-
-    const { courseId } = params
-    const body = await req.json()
-    const { title, description, url, duration, order } = body
-
-    // Check if course exists and user is the instructor
-    const course = await prisma.course.findUnique({
-      where: { id: courseId },
-      include: { videos: true }
-    })
-
-    if (!course) {
-      return NextResponse.json(
-        { error: 'Course not found' },
-        { status: 404 }
-      )
-    }
-
-    if (course.instructorId !== session.user.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 403 }
-      )
-    }
-
-    // Determine order if not provided
-    const videoOrder = order !== undefined ? order : course.videos.length + 1
-
-    // Create video
-    const video = await prisma.video.create({
-      data: {
-        title,
-        description,
-        url,
-        duration,
-        order: videoOrder,
-        courseId
-      }
-    })
-
-    return NextResponse.json({ success: true, video })
-  } catch (error) {
-    console.error('Video creation error:', error)
-    return NextResponse.json(
-      { error: 'Failed to add video' },
-      { status: 500 }
-    )
-  }
 }

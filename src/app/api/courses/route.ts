@@ -1,51 +1,80 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
-// Create a new course
-export async function POST(req: NextRequest) {
-  try {
-    const session = await getServerSession(authOptions)
+export async function GET(req: Request) {
+    try {
+        const { searchParams } = new URL(req.url);
+        const category = searchParams.get("category");
+        const level = searchParams.get("level");
 
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+        const courses = await prisma.course.findMany({
+            where: {
+                published: true,
+                ...(category && category !== "All" && { category }),
+                ...(level && level !== "All" && { level: level as any }),
+            },
+            include: {
+                instructor: {
+                    select: { name: true, image: true }
+                },
+                // @ts-ignore
+                reviews: {
+                    select: { rating: true }
+                }
+            },
+            orderBy: {
+                createdAt: "desc"
+            }
+        });
+
+        const formattedCourses = courses.map((course: any) => {
+            const hasReviews = course.reviews && Array.isArray(course.reviews);
+            const avgRating = hasReviews && course.reviews.length > 0
+                ? course.reviews.reduce((acc: number, rev: any) => acc + rev.rating, 0) / course.reviews.length
+                : 0;
+
+            return {
+                ...course,
+                avgRating,
+                totalReviews: hasReviews ? course.reviews.length : 0
+            };
+        });
+
+        return NextResponse.json(formattedCourses);
+    } catch (error) {
+        console.error("[COURSES_GET]", error);
+        return new NextResponse("Internal Error", { status: 500 });
     }
+}
 
-    const body = await req.json()
-    const { title, description, category, level, price, thumbnail } = body
+export async function POST(req: Request) {
+    try {
+        const session = await getServerSession(authOptions);
+        const { title } = await req.json();
 
-    // Validate required fields
-    if (!title || !description || !category) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      )
+        if (!session || (session.user.role !== "INSTRUCTOR" && session.user.role !== "ADMIN")) {
+            return new NextResponse("Unauthorized", { status: 401 });
+        }
+
+        if (!title) {
+            return new NextResponse("Title is required", { status: 400 });
+        }
+
+        const course = await prisma.course.create({
+            data: {
+                title,
+                description: "",
+                instructorId: session.user.id,
+                published: false,
+                category: "General", // Default value
+            },
+        });
+
+        return NextResponse.json(course);
+    } catch (error) {
+        console.error("[COURSES_POST]", error);
+        return new NextResponse("Internal Error", { status: 500 });
     }
-
-    // Create course
-    const course = await prisma.course.create({
-      data: {
-        title,
-        description,
-        category,
-        level: level || 'BEGINNER',
-        price: price || 0,
-        thumbnail,
-        instructorId: session.user.id,
-        published: false
-      }
-    })
-
-    return NextResponse.json({ success: true, course })
-  } catch (error) {
-    console.error('Course creation error:', error)
-    return NextResponse.json(
-      { error: 'Failed to create course' },
-      { status: 500 }
-    )
-  }
 }

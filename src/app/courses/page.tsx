@@ -1,69 +1,211 @@
-import { Header } from '@/components/Header'
-import { CourseCard } from '@/components/CourseCard'
-import { prisma } from '@/lib/prisma'
+'use client'
 
-export const dynamic = 'force-dynamic'
+import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
+import { Search, Filter, Sparkles } from 'lucide-react'
+import { Header } from '@/components/layout/Header'
+import { CourseCard } from '@/components/courses/CourseCard'
 
-export default async function CoursesPage() {
-  const courses = await prisma.course.findMany({
-    where: { published: true },
-    include: {
-      instructor: {
-        select: { name: true }
-      }
-    },
-    orderBy: { createdAt: 'desc' }
+export default function CoursesPage() {
+  const [courses, setCourses] = useState<any[]>([])
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState('All')
+  const [selectedLevel, setSelectedLevel] = useState('All')
+  const [selectedRating, setSelectedRating] = useState('0')
+  const [loading, setLoading] = useState(true)
+
+  const categories = ['All', 'Web Development', 'Data Science', 'Mobile Apps', 'Cloud Computing', 'AI & Machine Learning']
+  const levels = ['All', 'BEGINNER', 'INTERMEDIATE', 'ADVANCED']
+  const ratings = [
+    { label: 'All Ratings', value: '0' },
+    { label: '4.0 & Up', value: '4' },
+    { label: '3.0 & Up', value: '3' },
+  ]
+
+  useEffect(() => {
+    fetchCourses()
+  }, [selectedCategory, selectedLevel])
+
+  const fetchCourses = async () => {
+    try {
+      setLoading(true)
+      const url = new URL('/api/courses', window.location.origin)
+      if (selectedCategory !== 'All') url.searchParams.append('category', selectedCategory)
+      if (selectedLevel !== 'All') url.searchParams.append('level', selectedLevel)
+
+      const res = await fetch(url.toString())
+      const data = await res.json()
+      setCourses(data)
+    } catch (error) {
+      console.error('Failed to fetch courses:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const filteredCourses = courses.filter(course => {
+    const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      course.description?.toLowerCase().includes(searchQuery.toLowerCase())
+
+    const matchesRating = parseFloat(selectedRating) === 0 ||
+      (course.avgRating >= parseFloat(selectedRating))
+
+    return matchesSearch && matchesRating
   })
 
   return (
-    <main className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       <Header />
-      
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-4 text-gray-900">All Courses</h1>
-          <p className="text-gray-700">Explore our collection of courses</p>
-        </div>
 
-        {/* Filters */}
-        <div className="mb-8 flex gap-4 flex-wrap">
-          <select className="px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 font-medium">
-            <option value="">All Categories</option>
-            <option value="Web Development">Web Development</option>
-            <option value="Data Science">Data Science</option>
-            <option value="Mobile Apps">Mobile Apps</option>
-            <option value="Cloud Computing">Cloud Computing</option>
-          </select>
-          
-          <select className="px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 font-medium">
-            <option value="">All Levels</option>
-            <option value="BEGINNER">Beginner</option>
-            <option value="INTERMEDIATE">Intermediate</option>
-            <option value="ADVANCED">Advanced</option>
-          </select>
+      <main className="pt-24 pb-16">
+        <div className="max-w-[1400px] mx-auto px-6">
+          {/* Hero Section */}
+          <motion.div
+            className="text-center mb-16 py-12"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <motion.div
+              className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary/20 rounded-full mb-6"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              <Sparkles className="w-4 h-4 text-primary" />
+              <span className="text-xs font-bold uppercase tracking-widest text-primary">
+                Explore Courses
+              </span>
+            </motion.div>
 
-          <select className="px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 font-medium">
-            <option value="">Sort By</option>
-            <option value="newest">Newest</option>
-            <option value="popular">Most Popular</option>
-            <option value="price-low">Price: Low to High</option>
-            <option value="price-high">Price: High to Low</option>
-          </select>
-        </div>
+            <h1 className="text-4xl md:text-6xl font-display font-bold uppercase tracking-tighter text-foreground mb-4">
+              Discover Your Next
+              <span className="block gradient-text">Learning Adventure</span>
+            </h1>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Browse through thousands of courses and find the perfect one for your journey
+            </p>
+          </motion.div>
 
-        {/* Courses Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {courses.length > 0 ? (
-            courses.map((course: any) => (
-              <CourseCard key={course.id} {...course} />
-            ))
-          ) : (
-            <div className="col-span-full text-center py-12 text-gray-700 font-medium">
-              No courses available yet. Check back soon!
+          {/* Search and Filters */}
+          <motion.div
+            className="glass-card p-6 mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            {/* Search Bar */}
+            <div className="relative mb-8">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search courses..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-12 pr-4 py-4 bg-secondary/50 border border-border/50 rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all font-display"
+              />
             </div>
+
+            {/* Filters */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Category Filter */}
+              <div>
+                <label className="block text-[10px] font-display font-bold uppercase tracking-widest text-muted-foreground mb-3 px-1">
+                  Category
+                </label>
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="w-full px-4 py-3 bg-secondary/30 border border-white/5 rounded-xl text-sm text-foreground focus:outline-none focus:border-primary/50 transition-all font-semibold"
+                >
+                  {categories.map(cat => (
+                    <option key={cat} value={cat}>{cat} Courses</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Level Filter */}
+              <div>
+                <label className="block text-[10px] font-display font-bold uppercase tracking-widest text-muted-foreground mb-3 px-1">
+                  Skill Level
+                </label>
+                <select
+                  value={selectedLevel}
+                  onChange={(e) => setSelectedLevel(e.target.value)}
+                  className="w-full px-4 py-3 bg-secondary/30 border border-white/5 rounded-xl text-sm text-foreground focus:outline-none focus:border-primary/50 transition-all font-semibold"
+                >
+                  {levels.map(level => (
+                    <option key={level} value={level}>{level === 'All' ? 'All Levels' : level}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Rating Filter */}
+              <div>
+                <label className="block text-[10px] font-display font-bold uppercase tracking-widest text-muted-foreground mb-3 px-1">
+                  Minimum Rating
+                </label>
+                <select
+                  value={selectedRating}
+                  onChange={(e) => setSelectedRating(e.target.value)}
+                  className="w-full px-4 py-3 bg-secondary/30 border border-white/5 rounded-xl text-sm text-foreground focus:outline-none focus:border-primary/50 transition-all font-semibold"
+                >
+                  {ratings.map(rating => (
+                    <option key={rating.value} value={rating.value}>{rating.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Results Count */}
+            <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
+              <p className="text-[10px] text-muted-foreground font-display font-bold uppercase tracking-widest">
+                Showing <span className="text-primary">{filteredCourses.length}</span> Results
+              </p>
+              <button
+                onClick={() => {
+                  setSelectedCategory('All');
+                  setSelectedLevel('All');
+                  setSelectedRating('0');
+                  setSearchQuery('');
+                }}
+                className="text-[10px] text-red-400 hover:text-red-300 font-bold uppercase tracking-widest transition-colors"
+              >
+                Reset Filters
+              </button>
+            </div>
+          </motion.div>
+
+          {/* Courses Grid */}
+          {loading ? (
+            <div className="flex justify-center items-center py-20">
+              <motion.div
+                className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              />
+            </div>
+          ) : filteredCourses.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredCourses.map((course, index) => (
+                <CourseCard key={course.id} {...course} index={index} />
+              ))}
+            </div>
+          ) : (
+            <motion.div
+              className="text-center py-20 glass-card"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+            >
+              <div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Search className="w-10 h-10 text-primary" />
+              </div>
+              <h3 className="text-2xl font-display font-bold text-foreground mb-2">No courses found</h3>
+              <p className="text-muted-foreground">Try adjusting your filters or search query</p>
+            </motion.div>
           )}
         </div>
-      </div>
-    </main>
+      </main>
+    </div>
   )
 }

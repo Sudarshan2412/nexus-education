@@ -1,9 +1,10 @@
 import { redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { Header } from '@/components/Header'
+import { Header } from '@/components/layout/Header'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
+import { Video, Users, FileText, Plus, Edit, Eye } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,57 +30,91 @@ export default async function InstructorCoursesPage() {
   })
 
   return (
-    <main className="min-h-screen bg-white">
+    <div className="min-h-screen bg-grain bg-brand-dark">
       <Header />
-      
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-4xl font-bold mb-2">My Courses</h1>
-            <p className="text-gray-600">Manage your courses and content</p>
+
+      <div className="max-w-[1400px] mx-auto px-6 py-12 relative z-10">
+        {/* Header Section */}
+        <div className="mb-12">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+            <div>
+              <h1 className="text-5xl md:text-6xl font-display font-bold uppercase tracking-tighter text-white text-glow mb-2">
+                My Courses
+              </h1>
+              <p className="text-gray-400 uppercase tracking-wider text-xs">
+                Manage your courses and content
+              </p>
+            </div>
+            <Link
+              href="/instructor/courses/new"
+              className="flex items-center gap-2 px-6 py-3 bg-brand-blue hover:bg-blue-600 text-white rounded-full transition-all button-glow font-bold uppercase tracking-wider text-sm"
+            >
+              <Plus className="w-4 h-4" />
+              Create Course
+            </Link>
           </div>
-          <Link
-            href="/instructor/courses/new"
-            className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition"
-          >
-            Create New Course
-          </Link>
         </div>
 
+        {/* Courses Grid */}
         {courses.length > 0 ? (
           <div className="grid grid-cols-1 gap-6">
             {courses.map((course: any) => (
-              <div key={course.id} className="bg-white rounded-lg shadow-md p-6">
+              <div key={course.id} className="glass-card p-8 fade-in hover:border-brand-blue/30 transition-all duration-300">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="text-xl font-semibold">{course.title}</h3>
-                      <span className={`px-2 py-1 rounded text-xs ${
-                        course.published 
-                          ? 'bg-green-100 text-green-700' 
-                          : 'bg-yellow-100 text-yellow-700'
-                      }`}>
+                    <div className="flex items-center gap-3 mb-3">
+                      <h3 className="text-2xl font-bold text-white tracking-tight">
+                        {course.title}
+                      </h3>
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${course.published
+                          ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                          : 'bg-orange-500/10 text-orange-400 border border-orange-500/20'
+                        }`}>
                         {course.published ? 'Published' : 'Draft'}
                       </span>
                     </div>
-                    <p className="text-gray-600 mb-4">{course.description}</p>
-                    <div className="flex items-center gap-6 text-sm text-gray-500">
-                      <span>📹 {course._count.videos} videos</span>
-                      <span>👥 {course._count.enrollments} students</span>
-                      <span>✏️ {course._count.exercises} exercises</span>
+
+                    <p className="text-gray-400 mb-6 text-sm leading-relaxed">
+                      {course.description || 'No description provided yet'}
+                    </p>
+
+                    {/* Stats */}
+                    <div className="flex items-center gap-6">
+                      <div className="flex items-center gap-2 text-gray-400">
+                        <div className="p-1.5 bg-brand-blue/10 rounded-lg">
+                          <Video className="w-4 h-4 text-brand-blue" />
+                        </div>
+                        <span className="text-xs font-mono">{course._count.videos} videos</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-gray-400">
+                        <div className="p-1.5 bg-emerald-500/10 rounded-lg">
+                          <Users className="w-4 h-4 text-emerald-400" />
+                        </div>
+                        <span className="text-xs font-mono">{course._count.enrollments} students</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-gray-400">
+                        <div className="p-1.5 bg-purple-500/10 rounded-lg">
+                          <FileText className="w-4 h-4 text-purple-400" />
+                        </div>
+                        <span className="text-xs font-mono">{course._count.exercises} exercises</span>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex gap-2 ml-4">
+
+                  {/* Actions */}
+                  <div className="flex gap-3 ml-6">
                     <Link
                       href={`/instructor/courses/${course.id}/edit`}
-                      className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                      className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full transition-colors text-xs font-bold uppercase tracking-wider text-gray-300"
                     >
+                      <Edit className="w-4 h-4" />
                       Edit
                     </Link>
                     <Link
                       href={`/courses/${course.id}`}
-                      className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                      className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full transition-colors text-xs font-bold uppercase tracking-wider text-gray-300"
                     >
+                      <Eye className="w-4 h-4" />
                       View
                     </Link>
                   </div>
@@ -88,18 +123,28 @@ export default async function InstructorCoursesPage() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-12 bg-white rounded-lg">
-            <h3 className="text-xl font-semibold mb-2">No courses yet</h3>
-            <p className="text-gray-600 mb-6">Create your first course to get started</p>
-            <Link
-              href="/instructor/courses/new"
-              className="inline-block px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition"
-            >
-              Create Course
-            </Link>
+          <div className="glass-card p-12 text-center">
+            <div className="max-w-md mx-auto">
+              <div className="w-20 h-20 bg-brand-blue/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <Plus className="w-10 h-10 text-brand-blue" />
+              </div>
+              <h3 className="text-2xl font-bold uppercase tracking-tight text-white mb-2">
+                No Courses Yet
+              </h3>
+              <p className="text-gray-400 mb-8 text-sm">
+                Create your first course to get started
+              </p>
+              <Link
+                href="/instructor/courses/new"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-brand-blue hover:bg-blue-600 text-white rounded-full transition-all button-glow font-bold uppercase tracking-wider text-sm"
+              >
+                <Plus className="w-4 h-4" />
+                Create Course
+              </Link>
+            </div>
           </div>
         )}
       </div>
-    </main>
+    </div>
   )
 }

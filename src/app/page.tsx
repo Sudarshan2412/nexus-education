@@ -1,77 +1,24 @@
-import Link from 'next/link'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { Header } from '@/components/Header'
-import { CourseCard } from '@/components/CourseCard'
+import { Header } from '@/components/layout/Header'
+import { Hero } from '@/components/home/Hero'
+import { Features } from '@/components/home/Features'
+import { Categories } from '@/components/home/Categories'
+import { CTA } from '@/components/home/CTA'
 
-export default async function Home() {
-  const session = await getServerSession(authOptions)
-
+export default function Home() {
   return (
-    <main className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       <Header />
-      
-      <div className="container mx-auto px-4 py-8">
-        {/* Hero Section */}
-        <section className="text-center py-16">
-          <h1 className="text-5xl font-bold mb-4">
-            Learn Without Limits
-          </h1>
-          <p className="text-xl text-gray-600 mb-8">
-            Access thousands of courses, code repositories, and learning materials
-          </p>
-          <div className="flex gap-4 justify-center">
-            <Link 
-              href="/courses" 
-              className="bg-primary-600 text-white px-8 py-3 rounded-lg hover:bg-primary-700 transition"
-            >
-              Browse Courses
-            </Link>
-            {session ? (
-              <Link 
-                href="/instructor/courses" 
-                className="border-2 border-primary-600 text-primary-600 px-8 py-3 rounded-lg hover:bg-primary-50 transition"
-              >
-                Create a Course
-              </Link>
-            ) : (
-              <Link 
-                href="/auth/signup" 
-                className="border-2 border-primary-600 text-primary-600 px-8 py-3 rounded-lg hover:bg-primary-50 transition"
-              >
-                Get Started
-              </Link>
-            )}
-          </div>
-        </section>
+      <Hero />
+      <Features />
+      <Categories />
+      <CTA />
 
-        {/* Featured Courses */}
-        <section className="py-12">
-          <h2 className="text-3xl font-bold mb-8">Featured Courses</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Course cards will be populated dynamically */}
-            <div className="text-center text-gray-500 col-span-full py-12">
-              No courses available yet. Create your first course!
-            </div>
-          </div>
-        </section>
-
-        {/* Categories */}
-        <section className="py-12">
-          <h2 className="text-3xl font-bold mb-8">Popular Categories</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {['Web Development', 'Data Science', 'Mobile Apps', 'Cloud Computing'].map((category) => (
-              <Link
-                key={category}
-                href={`/courses?category=${category}`}
-                className="p-6 border rounded-lg hover:shadow-lg transition text-center"
-              >
-                <h3 className="font-semibold">{category}</h3>
-              </Link>
-            ))}
-          </div>
-        </section>
-      </div>
-    </main>
+      {/* Footer */}
+      <footer className="py-8 border-t border-border/50 text-center">
+        <p className="text-sm text-muted-foreground">
+          © 2026 Nexus Education. All rights reserved.
+        </p>
+      </footer>
+    </div>
   )
 }

@@ -1,190 +1,103 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { Header } from '@/components/Header'
+import axios from "axios";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { Header } from "@/components/Header";
+import { ArrowLeft, Sparkles } from "lucide-react";
+import Link from "next/link";
 
-export default function NewCoursePage() {
-  const router = useRouter()
-  const [loading, setLoading] = useState(false)
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    category: '',
-    level: 'BEGINNER',
-    price: 0,
-    thumbnail: ''
-  })
+export default function CreateCoursePage() {
+    const router = useRouter();
+    const [title, setTitle] = useState("");
+    const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
+    const onSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            setLoading(true);
+            const response = await axios.post("/api/courses", {
+                title,
+            });
+            router.push(`/instructor/courses/${response.data.id}/edit`);
+            router.refresh();
+        } catch (error) {
+            console.error("Something went wrong", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-    try {
-      const response = await fetch('/api/courses', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      })
+    return (
+        <div className="min-h-screen bg-grain bg-brand-dark">
+            <Header />
+            <div className="max-w-5xl mx-auto flex md:items-center md:justify-center h-full p-6 pt-20 relative z-10">
+                <div className="glass-card p-12 w-full max-w-2xl fade-in">
+                    {/* Back Button */}
+                    <Link
+                        href="/instructor/courses"
+                        className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-8 text-xs uppercase tracking-wider font-bold"
+                    >
+                        <ArrowLeft className="w-4 h-4" />
+                        Back to Courses
+                    </Link>
 
-      const data = await response.json()
+                    {/* Header */}
+                    <div className="mb-8">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="p-3 bg-brand-blue/10 rounded-xl">
+                                <Sparkles className="w-6 h-6 text-brand-blue" />
+                            </div>
+                            <h1 className="text-4xl font-display font-bold uppercase tracking-tighter text-white text-glow">
+                                Create Course
+                            </h1>
+                        </div>
+                        <p className="text-gray-400 text-sm">
+                            What would you like to name your course? Don't worry, you can change this later.
+                        </p>
+                    </div>
 
-      if (response.ok) {
-        router.push(`/instructor/courses/${data.course.id}/edit`)
-      } else {
-        alert(data.error || 'Failed to create course')
-      }
-    } catch (error) {
-      console.error('Course creation error:', error)
-      alert('Failed to create course')
-    } finally {
-      setLoading(false)
-    }
-  }
+                    <form onSubmit={onSubmit} className="space-y-8">
+                        <div className="space-y-3">
+                            <label className="block text-xs font-bold uppercase tracking-widest text-gray-400">
+                                Course Title
+                            </label>
+                            <input
+                                disabled={loading}
+                                type="text"
+                                className="w-full h-14 px-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                placeholder="e.g. 'Advanced Web Development'"
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                            />
+                        </div>
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: name === 'price' ? parseFloat(value) || 0 : value
-    }))
-  }
-
-  return (
-    <main className="min-h-screen bg-gray-50">
-      <Header />
-      
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-4xl font-bold mb-8">Create New Course</h1>
-
-          <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-8">
-            <div className="space-y-6">
-              {/* Title */}
-              <div>
-                <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
-                  Course Title *
-                </label>
-                <input
-                  type="text"
-                  id="title"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  placeholder="e.g., Introduction to Web Development"
-                />
-              </div>
-
-              {/* Description */}
-              <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-                  Description *
-                </label>
-                <textarea
-                  id="description"
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  required
-                  rows={4}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  placeholder="Describe what students will learn in this course..."
-                />
-              </div>
-
-              {/* Category */}
-              <div>
-                <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
-                  Category *
-                </label>
-                <input
-                  type="text"
-                  id="category"
-                  name="category"
-                  value={formData.category}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  placeholder="e.g., Programming, Design, Business"
-                />
-              </div>
-
-              {/* Level */}
-              <div>
-                <label htmlFor="level" className="block text-sm font-medium text-gray-700 mb-2">
-                  Level
-                </label>
-                <select
-                  id="level"
-                  name="level"
-                  value={formData.level}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                >
-                  <option value="BEGINNER">Beginner</option>
-                  <option value="INTERMEDIATE">Intermediate</option>
-                  <option value="ADVANCED">Advanced</option>
-                </select>
-              </div>
-
-              {/* Price */}
-              <div>
-                <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-2">
-                  Price (USD)
-                </label>
-                <input
-                  type="number"
-                  id="price"
-                  name="price"
-                  value={formData.price}
-                  onChange={handleChange}
-                  min="0"
-                  step="0.01"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  placeholder="0.00"
-                />
-                <p className="text-sm text-gray-500 mt-1">Set to 0 for a free course</p>
-              </div>
-
-              {/* Thumbnail URL */}
-              <div>
-                <label htmlFor="thumbnail" className="block text-sm font-medium text-gray-700 mb-2">
-                  Thumbnail URL
-                </label>
-                <input
-                  type="url"
-                  id="thumbnail"
-                  name="thumbnail"
-                  value={formData.thumbnail}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  placeholder="https://example.com/image.jpg"
-                />
-              </div>
+                        <div className="flex items-center gap-3 pt-4">
+                            <button
+                                type="button"
+                                onClick={() => router.back()}
+                                className="px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 hover:text-white rounded-full transition-all text-xs font-bold uppercase tracking-wider"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={!title || loading}
+                                className="flex-1 px-6 py-3 bg-brand-blue hover:bg-blue-600 text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed transition-all button-glow text-xs font-bold uppercase tracking-wider"
+                            >
+                                {loading ? (
+                                    <span className="flex items-center justify-center gap-2">
+                                        <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                        Creating...
+                                    </span>
+                                ) : (
+                                    "Continue"
+                                )}
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-
-            {/* Submit Buttons */}
-            <div className="flex gap-4 mt-8">
-              <button
-                type="submit"
-                disabled={loading}
-                className="flex-1 px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? 'Creating...' : 'Create Course'}
-              </button>
-              <button
-                type="button"
-                onClick={() => router.back()}
-                className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
         </div>
-      </div>
-    </main>
-  )
+    );
 }

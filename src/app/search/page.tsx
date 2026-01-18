@@ -1,213 +1,180 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { Header } from '@/components/Header'
-import { CourseCard } from '@/components/CourseCard'
-import { UserCard } from '@/components/UserCard'
-import axios from 'axios'
-
-type SearchType = 'courses' | 'people'
-
-interface Course {
-  id: string
-  title: string
-  description: string
-  thumbnail: string | null
-  category: string
-  price: number
-  level: string
-  instructor: {
-    name: string | null
-    id: string
-  }
-  _count: {
-    enrollments: number
-  }
-}
-
-interface User {
-  id: string
-  name: string | null
-  email: string
-  skills: string[]
-  _count: {
-    coursesCreated: number
-    enrollments: number
-  }
-}
+import { useState } from 'react';
+import { Header } from '@/components/layout/Header';
+import { Search as SearchIcon, Users, BookOpen, Loader2 } from 'lucide-react';
+import axios from 'axios';
+import { CourseCard } from '@/components/courses/CourseCard';
+import Link from 'next/link';
 
 export default function SearchPage() {
-  const [searchType, setSearchType] = useState<SearchType>('courses')
-  const [query, setQuery] = useState('')
-  const [courses, setCourses] = useState<Course[]>([])
-  const [users, setUsers] = useState<User[]>([])
-  const [loading, setLoading] = useState(false)
-  const [hasSearched, setHasSearched] = useState(false)
+    const [query, setQuery] = useState('');
+    const [searchType, setSearchType] = useState<'courses' | 'people'>('courses');
+    const [results, setResults] = useState<any[]>([]);
+    const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (query.trim()) {
-        handleSearch()
-      } else {
-        setCourses([])
-        setUsers([])
-        setHasSearched(false)
-      }
-    }, 500)
+    const handleSearch = async (searchQuery: string) => {
+        if (!searchQuery.trim()) {
+            setResults([]);
+            return;
+        }
 
-    return () => clearTimeout(timeoutId)
-  }, [query, searchType])
+        setLoading(true);
+        try {
+            const { data } = await axios.get(`/api/search?q=${encodeURIComponent(searchQuery)}&type=${searchType}`);
+            setResults(data.results || []);
+        } catch (error) {
+            console.error('Search error:', error);
+            setResults([]);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  const handleSearch = async () => {
-    if (!query.trim()) return
+    const handleInputChange = (value: string) => {
+        setQuery(value);
+        if (value.length >= 2) {
+            handleSearch(value);
+        } else {
+            setResults([]);
+        }
+    };
 
-    setLoading(true)
-    setHasSearched(true)
+    return (
+        <main className="min-h-screen bg-grain bg-brand-dark">
+            <Header />
 
-    try {
-      if (searchType === 'courses') {
-        const response = await axios.get(`/api/search/courses?q=${encodeURIComponent(query)}`)
-        setCourses(response.data.courses)
-      } else {
-        const response = await axios.get(`/api/search/people?q=${encodeURIComponent(query)}`)
-        setUsers(response.data.users)
-      }
-    } catch (error) {
-      console.error('Search error:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
+            <div className="max-w-[1400px] mx-auto px-6 py-12 relative z-10">
+                {/* Header */}
+                <div className="mb-12">
+                    <div className="flex items-center gap-4 mb-4">
+                        <div className="p-3 bg-brand-blue/10 rounded-xl">
+                            <SearchIcon className="w-8 h-8 text-brand-blue" />
+                        </div>
+                        <div>
+                            <h1 className="text-5xl md:text-6xl font-display font-bold uppercase tracking-tighter text-white text-glow">
+                                Search
+                            </h1>
+                            <p className="text-gray-400 uppercase tracking-wider text-xs mt-2">
+                                Find courses and people
+                            </p>
+                        </div>
+                    </div>
+                </div>
 
-  return (
-    <main className="min-h-screen bg-white">
-      <Header />
-      
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-4xl font-bold mb-8 text-gray-900">Search</h1>
+                {/* Search Box */}
+                <div className="glass-card p-8 mb-12">
+                    {/* Search Type Tabs */}
+                    <div className="flex gap-3 mb-6">
+                        <button
+                            onClick={() => setSearchType('courses')}
+                            className={`flex items-center gap-2 px-6 py-3 rounded-full text-xs font-bold uppercase tracking-wider transition-all ${searchType === 'courses'
+                                    ? 'bg-brand-blue text-white button-glow'
+                                    : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
+                                }`}
+                        >
+                            <BookOpen className="w-4 h-4" />
+                            Courses
+                        </button>
+                        <button
+                            onClick={() => setSearchType('people')}
+                            className={`flex items-center gap-2 px-6 py-3 rounded-full text-xs font-bold uppercase tracking-wider transition-all ${searchType === 'people'
+                                    ? 'bg-brand-blue text-white button-glow'
+                                    : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
+                                }`}
+                        >
+                            <Users className="w-4 h-4" />
+                            People
+                        </button>
+                    </div>
 
-        {/* Search Type Tabs */}
-        <div className="flex gap-4 mb-6 border-b border-gray-200">
-          <button
-            onClick={() => {
-              setSearchType('courses')
-              setCourses([])
-              setUsers([])
-              setHasSearched(false)
-            }}
-            className={`px-6 py-3 font-medium transition border-b-2 ${
-              searchType === 'courses'
-                ? 'border-primary-600 text-primary-600'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            Courses
-          </button>
-          <button
-            onClick={() => {
-              setSearchType('people')
-              setCourses([])
-              setUsers([])
-              setHasSearched(false)
-            }}
-            className={`px-6 py-3 font-medium transition border-b-2 ${
-              searchType === 'people'
-                ? 'border-primary-600 text-primary-600'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            People
-          </button>
-        </div>
+                    {/* Search Input */}
+                    <div className="relative">
+                        <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                        <input
+                            type="text"
+                            value={query}
+                            onChange={(e) => handleInputChange(e.target.value)}
+                            placeholder={`Search for ${searchType}...`}
+                            className="w-full h-14 pl-14 pr-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent transition-all text-lg"
+                            autoFocus
+                        />
+                        {loading && (
+                            <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-brand-blue animate-spin" />
+                        )}
+                    </div>
+                </div>
 
-        {/* Search Input */}
-        <div className="mb-8">
-          <input
-            type="text"
-            placeholder={
-              searchType === 'courses'
-                ? 'Search for courses by title, description, category, or instructor...'
-                : 'Search for people by name, email, or skills...'
-            }
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="w-full px-6 py-4 text-lg border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white text-gray-900"
-          />
-        </div>
+                {/* Results */}
+                <div>
+                    {query.length >= 2 && (
+                        <>
+                            <div className="mb-6">
+                                <p className="text-gray-400 text-sm uppercase tracking-wider">
+                                    {loading ? (
+                                        'Searching...'
+                                    ) : (
+                                        <>
+                                            <span className="text-white font-bold">{results.length}</span> {searchType} found
+                                        </>
+                                    )}
+                                </p>
+                            </div>
 
-        {/* Loading State */}
-        {loading && (
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-            <p className="mt-4 text-gray-600">Searching...</p>
-          </div>
-        )}
+                            {searchType === 'courses' ? (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {results.map((course: any) => (
+                                        <CourseCard key={course.id} {...course} />
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {results.map((user: any) => (
+                                        <div key={user.id} className="glass-card p-6 hover:border-brand-blue/30 transition-all">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-16 h-16 rounded-xl bg-brand-blue/10 border border-brand-blue/20 text-brand-blue flex items-center justify-center text-2xl font-bold uppercase">
+                                                    {user.name?.[0] || user.email[0]}
+                                                </div>
+                                                <div className="flex-1">
+                                                    <h3 className="font-bold text-white mb-1">{user.name}</h3>
+                                                    <p className="text-xs text-gray-400 mb-2">{user.email}</p>
+                                                    <span className="inline-block px-3 py-1 bg-brand-blue/10 text-brand-blue border border-brand-blue/20 rounded-full text-[10px] font-bold uppercase tracking-widest">
+                                                        {user.role}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
 
-        {/* Results */}
-        {!loading && hasSearched && (
-          <>
-            {searchType === 'courses' && (
-              <div>
-                <h2 className="text-2xl font-bold mb-4 text-gray-900">
-                  {courses.length} {courses.length === 1 ? 'Course' : 'Courses'} Found
-                </h2>
-                {courses.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {courses.map((course) => (
-                      <CourseCard key={course.id} {...course} />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12 text-gray-500 bg-gray-50 rounded-lg">
-                    No courses found matching &quot;{query}&quot;
-                  </div>
-                )}
-              </div>
-            )}
+                            {!loading && results.length === 0 && (
+                                <div className="glass-card p-16 text-center">
+                                    <SearchIcon className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                                    <h3 className="text-2xl font-bold uppercase tracking-tight text-white mb-2">
+                                        No Results Found
+                                    </h3>
+                                    <p className="text-gray-400 text-sm">
+                                        Try searching with different keywords
+                                    </p>
+                                </div>
+                            )}
+                        </>
+                    )}
 
-            {searchType === 'people' && (
-              <div>
-                <h2 className="text-2xl font-bold mb-4 text-gray-900">
-                  {users.length} {users.length === 1 ? 'Person' : 'People'} Found
-                </h2>
-                {users.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {users.map((user) => (
-                      <UserCard key={user.id} {...user} />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12 text-gray-500 bg-gray-50 rounded-lg">
-                    No people found matching &quot;{query}&quot;
-                  </div>
-                )}
-              </div>
-            )}
-          </>
-        )}
-
-        {/* Empty State */}
-        {!loading && !hasSearched && (
-          <div className="text-center py-12 text-gray-500">
-            <svg
-              className="mx-auto h-24 w-24 text-gray-400 mb-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
-            <p className="text-xl">
-              Start typing to search for {searchType === 'courses' ? 'courses' : 'people'}
-            </p>
-          </div>
-        )}
-      </div>
-    </main>
-  )
+                    {query.length < 2 && (
+                        <div className="glass-card p-16 text-center">
+                            <SearchIcon className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                            <h3 className="text-2xl font-bold uppercase tracking-tight text-white mb-2">
+                                Start Searching
+                            </h3>
+                            <p className="text-gray-400 text-sm">
+                                Enter at least 2 characters to search
+                            </p>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </main>
+    );
 }
