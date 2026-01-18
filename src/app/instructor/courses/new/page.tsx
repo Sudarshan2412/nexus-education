@@ -3,7 +3,7 @@
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Header } from "@/components/Header";
+import { Header } from "@/components/layout/Header";
 import { ArrowLeft, Sparkles } from "lucide-react";
 import Link from "next/link";
 
