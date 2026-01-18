@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
+import { ProgressBar } from './ProgressBar'
 
 interface CourseCardProps {
   id: string
@@ -12,6 +13,7 @@ interface CourseCardProps {
   category: string
   price: number
   level: string
+  progress?: number
 }
 
 export function CourseCard({ 
@@ -22,7 +24,8 @@ export function CourseCard({
   instructor,
   category,
   price,
-  level 
+  level,
+  progress
 }: CourseCardProps) {
   return (
     <Link href={`/courses/${id}`}>
@@ -52,6 +55,14 @@ export function CourseCard({
           </div>
           <h3 className="font-semibold text-lg mb-2 line-clamp-2">{title}</h3>
           <p className="text-sm text-gray-600 mb-3 line-clamp-2">{description}</p>
+          
+          {progress !== undefined && (
+            <div className="mb-3">
+              <ProgressBar progress={progress} showLabel={false} />
+              <p className="text-xs text-gray-500 mt-1">{progress.toFixed(0)}% complete</p>
+            </div>
+          )}
+          
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-500">{instructor.name}</span>
             <span className="font-bold text-primary-600">

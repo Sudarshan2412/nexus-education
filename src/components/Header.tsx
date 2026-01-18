@@ -23,6 +23,12 @@ export function Header() {
             >
               Courses
             </Link>
+            <Link 
+              href="/search" 
+              className={`text-white hover:text-primary-400 transition ${pathname === '/search' ? 'text-primary-400 font-semibold' : ''}`}
+            >
+              Search
+            </Link>
             {session && (
               <>
                 <Link 

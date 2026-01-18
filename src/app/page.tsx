@@ -1,8 +1,12 @@
 import Link from 'next/link'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import { Header } from '@/components/Header'
 import { CourseCard } from '@/components/CourseCard'
 
-export default function Home() {
+export default async function Home() {
+  const session = await getServerSession(authOptions)
+
   return (
     <main className="min-h-screen bg-white">
       <Header />
@@ -23,12 +27,21 @@ export default function Home() {
             >
               Browse Courses
             </Link>
-            <Link 
-              href="/auth/signin" 
-              className="border-2 border-primary-600 text-primary-600 px-8 py-3 rounded-lg hover:bg-primary-50 transition"
-            >
-              Get Started
-            </Link>
+            {session ? (
+              <Link 
+                href="/instructor/courses" 
+                className="border-2 border-primary-600 text-primary-600 px-8 py-3 rounded-lg hover:bg-primary-50 transition"
+              >
+                Create a Course
+              </Link>
+            ) : (
+              <Link 
+                href="/auth/signup" 
+                className="border-2 border-primary-600 text-primary-600 px-8 py-3 rounded-lg hover:bg-primary-50 transition"
+              >
+                Get Started
+              </Link>
+            )}
           </div>
         </section>
 

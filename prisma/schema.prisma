@@ -15,6 +15,7 @@ model User {
   image         String?
   password      String?
   role          Role      @default(STUDENT)
+  skills        String[]  @default([])
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -174,10 +175,30 @@ model Enrollment {
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  videoProgress VideoProgress[]
 
   @@unique([userId, courseId])
   @@index([userId])
   @@index([courseId])
+}
+
+model VideoProgress {
+  id           String   @id @default(cuid())
+  userId       String
+  videoId      String
+  enrollmentId String
+  completed    Boolean  @default(false)
+  watchTime    Int      @default(0)
+  lastWatched  DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  enrollment Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, videoId])
+  @@index([userId])
+  @@index([videoId])
+  @@index([enrollmentId])
 }
 
 enum Role {
