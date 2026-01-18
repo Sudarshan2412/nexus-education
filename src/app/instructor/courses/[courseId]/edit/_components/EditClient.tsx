@@ -19,7 +19,8 @@ import {
     ChevronDown,
     ChevronUp,
     Save,
-    X
+    X,
+    Github
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -35,6 +36,7 @@ export const EditClient = ({ course }: EditClientProps) => {
     const [videos, setVideos] = useState(course.videos || []);
     const [materials, setMaterials] = useState(course.materials || []);
     const [exercises, setExercises] = useState(course.exercises || []);
+    const [codeRepos, setCodeRepos] = useState(course.codeRepos || []);
 
     // Video editing state
     const [editingVideoId, setEditingVideoId] = useState<string | null>(null);
@@ -49,6 +51,14 @@ export const EditClient = ({ course }: EditClientProps) => {
         points: 10,
         options: { A: "", B: "", C: "", D: "" },
         correctAnswer: "A"
+    });
+
+    // Repo connect form
+    const [repoForm, setRepoForm] = useState({
+        name: "",
+        repoUrl: "",
+        branch: "main",
+        description: ""
     });
 
     const onVideoUploadComplete = async (url: string) => {
@@ -137,6 +147,29 @@ export const EditClient = ({ course }: EditClientProps) => {
             router.refresh();
         } catch (error) {
             alert("Failed to create exercise");
+        }
+    };
+
+    const connectRepo = async () => {
+        if (!repoForm.name || !repoForm.repoUrl) return;
+        try {
+            const response = await axios.post(`/api/courses/${course.id}/code-repos`, repoForm);
+            setCodeRepos((current: any) => [...current, response.data]);
+            setRepoForm({ name: "", repoUrl: "", branch: "main", description: "" });
+            router.refresh();
+        } catch (error) {
+            alert("Failed to connect repository");
+        }
+    };
+
+    const deleteRepo = async (id: string) => {
+        if (!confirm("Remove this repository?")) return;
+        try {
+            await axios.delete(`/api/code-repos/${id}`);
+            setCodeRepos((current: any) => current.filter((r: any) => r.id !== id));
+            router.refresh();
+        } catch (error) {
+            alert("Failed to remove repository");
         }
     };
 
@@ -286,6 +319,60 @@ export const EditClient = ({ course }: EditClientProps) => {
                             </div>
 
                             <div className="glass-card p-6">
+                                <div className="flex items-center gap-2 mb-6">
+                                    <Github className="w-5 h-5 text-primary" />
+                                    <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400">
+                                        Connect GitHub Repository
+                                    </h3>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2 block">Name</label>
+                                        <input
+                                            value={repoForm.name}
+                                            onChange={(e) => setRepoForm({ ...repoForm, name: e.target.value })}
+                                            placeholder="Repo display name"
+                                            className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary transition-all"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2 block">Branch</label>
+                                        <input
+                                            value={repoForm.branch}
+                                            onChange={(e) => setRepoForm({ ...repoForm, branch: e.target.value })}
+                                            placeholder="main"
+                                            className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary transition-all"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="mt-4">
+                                    <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2 block">Repository URL</label>
+                                    <input
+                                        value={repoForm.repoUrl}
+                                        onChange={(e) => setRepoForm({ ...repoForm, repoUrl: e.target.value })}
+                                        placeholder="https://github.com/org/repo"
+                                        className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary transition-all"
+                                    />
+                                </div>
+                                <div className="mt-4">
+                                    <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2 block">Description (optional)</label>
+                                    <textarea
+                                        value={repoForm.description}
+                                        onChange={(e) => setRepoForm({ ...repoForm, description: e.target.value })}
+                                        placeholder="Brief notes for students"
+                                        className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary transition-all min-h-[80px]"
+                                    />
+                                </div>
+                                <button
+                                    onClick={connectRepo}
+                                    disabled={!repoForm.name || !repoForm.repoUrl}
+                                    className="mt-4 w-full py-3 bg-primary text-black rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-primary/80 transition-all shadow-lg shadow-primary/10 disabled:opacity-50"
+                                >
+                                    Connect Repository
+                                </button>
+                            </div>
+
+                            <div className="glass-card p-6">
                                 <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-6">
                                     Course Materials ({materials.length})
                                 </h3>
@@ -320,6 +407,48 @@ export const EditClient = ({ course }: EditClientProps) => {
                                             </div>
                                             <button
                                                 onClick={() => deleteMaterial(material.id)}
+                                                className="p-2 opacity-0 group-hover:opacity-100 bg-red-500/10 rounded-xl text-red-400 hover:bg-red-500/20 transition-all"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="glass-card p-6">
+                                <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-6">
+                                    Code Repositories ({codeRepos.length})
+                                </h3>
+                                <div className="space-y-3">
+                                    {codeRepos.length === 0 && (
+                                        <div className="text-center py-12 border-2 border-dashed border-white/5 rounded-2xl">
+                                            <Github className="w-10 h-10 text-white/10 mx-auto mb-4" />
+                                            <p className="text-gray-500 text-sm uppercase tracking-widest font-bold">
+                                                No repositories connected yet
+                                            </p>
+                                        </div>
+                                    )}
+                                    {codeRepos.map((repo: any) => (
+                                        <div key={repo.id} className="group flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/10 hover:border-primary/50 transition-all">
+                                            <div className="flex items-center gap-x-3">
+                                                <div className="p-2.5 bg-primary/10 rounded-xl">
+                                                    <Github className="w-4 h-4 text-primary" />
+                                                </div>
+                                                <div>
+                                                    <p className="font-bold text-white text-sm uppercase tracking-tight">
+                                                        {repo.name}
+                                                    </p>
+                                                    <p className="text-[10px] text-primary uppercase tracking-widest font-bold">
+                                                        {repo.branch || "main"}
+                                                    </p>
+                                                    <p className="text-[10px] text-gray-500 uppercase tracking-widest font-mono truncate max-w-[280px]">
+                                                        {repo.repoUrl}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <button
+                                                onClick={() => deleteRepo(repo.id)}
                                                 className="p-2 opacity-0 group-hover:opacity-100 bg-red-500/10 rounded-xl text-red-400 hover:bg-red-500/20 transition-all"
                                             >
                                                 <Trash2 className="w-4 h-4" />

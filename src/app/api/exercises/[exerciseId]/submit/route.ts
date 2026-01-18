@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { updateCourseProgress } from '@/lib/progress'
 
 // POST /api/exercises/[exerciseId]/submit - Submit exercise answer
 export async function POST(
@@ -67,6 +68,9 @@ export async function POST(
                 score
             }
         })
+
+        // Update overall course progress to include answered exercises
+        await updateCourseProgress(session.user.id, exercise.courseId)
 
         return NextResponse.json({
             submission,

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { updateCourseProgress } from '@/lib/progress'
 
 // POST /api/videos/[videoId]/progress - Update video progress
 export async function POST(
@@ -73,10 +74,8 @@ export async function POST(
             }
         })
 
-        // Update course progress
-        if (completed) {
-            await updateCourseProgress(session.user.id, video.courseId)
-        }
+        // Update course progress (videos + answered exercises)
+        await updateCourseProgress(session.user.id, video.courseId)
 
         return NextResponse.json({ videoProgress })
 
@@ -123,44 +122,4 @@ export async function GET(
     }
 }
 
-// Helper function to calculate and update course progress
-async function updateCourseProgress(userId: string, courseId: string) {
-    try {
-        // Get all videos in the course
-        const videos = await prisma.video.findMany({
-            where: { courseId },
-            select: { id: true }
-        })
-
-        if (videos.length === 0) return
-
-        // Get completed videos
-        const completedVideos = await prisma.videoProgress.count({
-            where: {
-                userId,
-                videoId: { in: videos.map(v => v.id) },
-                completed: true
-            }
-        })
-
-        // Calculate progress percentage
-        const progressPercentage = (completedVideos / videos.length) * 100
-
-        // Update enrollment progress
-        await prisma.enrollment.update({
-            where: {
-                userId_courseId: {
-                    userId,
-                    courseId
-                }
-            },
-            data: {
-                progress: progressPercentage,
-                completedAt: progressPercentage === 100 ? new Date() : null
-            }
-        })
-
-    } catch (error) {
-        console.error('Update course progress error:', error)
-    }
-}
+// Progress calculation now lives in lib/progress

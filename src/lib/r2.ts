@@ -4,6 +4,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 const r2Client = new S3Client({
   region: 'auto',
   endpoint: process.env.R2_ENDPOINT,
+  forcePathStyle: true, // required for R2 signature correctness
   credentials: {
     accessKeyId: process.env.R2_ACCESS_KEY_ID!,
     secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
@@ -37,10 +38,11 @@ export async function deleteFromR2(key: string): Promise<void> {
   await r2Client.send(command)
 }
 
-export async function getSignedUploadUrl(key: string): Promise<string> {
+export async function getSignedUploadUrl(key: string, contentType?: string): Promise<string> {
   const command = new PutObjectCommand({
     Bucket: process.env.R2_BUCKET_NAME,
     Key: key,
+    ContentType: contentType,
   })
 
   return await getSignedUrl(r2Client, command, { expiresIn: 3600 })

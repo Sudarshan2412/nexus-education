@@ -9,30 +9,32 @@ export async function POST(req: Request) {
         const session = await getServerSession(authOptions);
 
         if (!session || (session.user.role !== "INSTRUCTOR" && session.user.role !== "ADMIN")) {
-            return new NextResponse("Unauthorized", { status: 401 });
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
         const body = await req.json();
-        const { filename, contentType, courseId } = body;
+        const { filename, contentType, courseId, folder } = body;
 
         if (!filename || !contentType || !courseId) {
-            return new NextResponse("Missing required fields", { status: 400 });
+            return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
         }
+
+        const targetFolder = folder === "materials" ? "materials" : "videos";
 
         // Sanitize filename and create unique path
         const fileExtension = filename.split(".").pop();
         const uniqueFilename = `${uuidv4()}.${fileExtension}`;
-        const key = `courses/${courseId}/videos/${uniqueFilename}`;
+        const key = `courses/${courseId}/${targetFolder}/${uniqueFilename}`;
 
-        const uploadUrl = await getSignedUploadUrl(key);
+        const uploadUrl = await getSignedUploadUrl(key, contentType);
 
         return NextResponse.json({
             uploadUrl,
             key,
             publicUrl: `${process.env.R2_PUBLIC_URL}/${key}`,
         });
-    } catch (error) {
+    } catch (error: any) {
         console.error("[UPLOAD_ERROR]", error);
-        return new NextResponse("Internal Error", { status: 500 });
+        return NextResponse.json({ error: "Internal Error" }, { status: 500 });
     }
 }
