@@ -40,6 +40,7 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           name: user.name,
           role: user.role,
+          credits: user.credits,
         }
       }
     })
@@ -54,6 +55,15 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.role = user.role
+        token.credits = (user as any).credits
+      }
+
+      if (!token.credits && token.sub) {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.sub },
+          select: { credits: true },
+        })
+        token.credits = dbUser?.credits ?? 0
       }
       return token
     },
@@ -61,6 +71,7 @@ export const authOptions: NextAuthOptions = {
       if (session?.user) {
         session.user.id = token.sub!
         session.user.role = token.role as string
+        session.user.credits = (token as any).credits ?? 0
       }
       return session
     },

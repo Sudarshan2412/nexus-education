@@ -4,8 +4,9 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
 import { motion } from 'framer-motion'
-import { GraduationCap, Menu, X, LogOut, User, BookOpen, Search } from 'lucide-react'
+import { GraduationCap, Menu, X, LogOut, User, BookOpen, Search, Coins } from 'lucide-react'
 import { useState } from 'react'
+import { Notifications } from './Notifications'
 
 export function Header() {
   const pathname = usePathname()
@@ -15,16 +16,17 @@ export function Header() {
   const navLinks = [
     { href: '/search', label: 'Search', icon: Search },
     { href: '/courses', label: 'Courses', icon: BookOpen },
+    { href: '/bounties', label: 'Bounties', icon: Coins },
     { href: '/my-learning', label: 'My Learning', icon: GraduationCap },
   ]
 
-  if (session?.user?.role === 'INSTRUCTOR' || session?.user?.role === 'ADMIN') {
+  if (session?.user) {
     navLinks.push({ href: '/instructor/courses', label: 'Teach', icon: GraduationCap })
   }
 
   return (
     <motion.header
-      className="fixed top-0 left-0 right-0 z-50 glass-card border-b border-border/50"
+      className="fixed top-0 left-0 right-0 z-[300] glass-card border-b border-border/50 overflow-visible"
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.5 }}
@@ -81,6 +83,7 @@ export function Header() {
           <div className="flex items-center gap-3">
             {session ? (
               <>
+                <Notifications />
                 <Link
                   href="/profile"
                   className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 hover:bg-secondary border border-border/50 transition-all"

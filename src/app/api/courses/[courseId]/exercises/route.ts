@@ -35,7 +35,7 @@ export async function POST(
 ) {
     try {
         const session = await getServerSession(authOptions)
-        if (!session?.user || (session.user.role !== 'INSTRUCTOR' && session.user.role !== 'ADMIN')) {
+        if (!session?.user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
@@ -47,7 +47,11 @@ export async function POST(
             where: { id: params.courseId }
         })
 
-        if (!course || course.instructorId !== session.user.id) {
+        if (!course) {
+            return NextResponse.json({ error: 'Course not found' }, { status: 404 })
+        }
+
+        if (session.user.role !== 'ADMIN' && course.instructorId !== session.user.id) {
             return NextResponse.json({ error: 'Not your course' }, { status: 403 })
         }
 

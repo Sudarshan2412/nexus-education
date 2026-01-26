@@ -41,6 +41,13 @@ export async function POST(
             )
         }
 
+        if (course.price === 50) {
+            return NextResponse.json(
+                { error: 'This course costs 50 credits. Purchase or trade to access.' },
+                { status: 400 }
+            )
+        }
+
         // Check if already enrolled
         const existingEnrollment = await prisma.enrollment.findUnique({
             where: {

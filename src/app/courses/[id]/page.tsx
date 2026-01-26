@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import Link from "next/link";
 import { EnrollButton } from "@/components/courses/EnrollButton";
+import { CourseAccessActions } from "@/components/courses/CourseAccessActions";
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +31,7 @@ export default async function CoursePage({
       enrollments: session?.user
         ? {
             where: { userId: session.user.id },
-             select: { id: true, progress: true },
+            select: { id: true, progress: true },
           }
         : false,
     },
@@ -44,6 +45,30 @@ export default async function CoursePage({
     session?.user && course.enrollments && course.enrollments.length > 0;
   const enrollment = isEnrolled ? course.enrollments[0] : null;
   let progress = enrollment?.progress ?? 0;
+  const isPaidCourse = course.price === 50;
+
+  let userCredits = 0;
+  let userTradeCourses: { id: string; title: string }[] = [];
+
+  if (session?.user) {
+    const [userCreditRow, tradeCourses] = await Promise.all([
+      prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { credits: true },
+      }),
+      prisma.course.findMany({
+        where: {
+          instructorId: session.user.id,
+          published: true,
+          price: 50,
+        },
+        select: { id: true, title: true },
+      }),
+    ]);
+
+    userCredits = userCreditRow?.credits ?? 0;
+    userTradeCourses = tradeCourses;
+  }
 
   // Recompute exercise-based progress so previously submitted exercises reflect immediately
   if (isEnrolled && course.exercises.length > 0) {
@@ -53,7 +78,8 @@ export default async function CoursePage({
         exerciseId: { in: course.exercises.map((e) => e.id) },
       },
     });
-    const computedProgress = (answeredExercises / course.exercises.length) * 100;
+    const computedProgress =
+      (answeredExercises / course.exercises.length) * 100;
 
     // Persist the updated progress for consistency
     if (Math.abs((enrollment?.progress ?? 0) - computedProgress) > 0.01) {
@@ -218,27 +244,39 @@ export default async function CoursePage({
                       Continue Learning
                     </Link>
 
-                      <div className="pt-2">
-                        <p className="text-xs uppercase tracking-widest text-muted-foreground font-semibold mb-2">
-                          Your progress
-                        </p>
-                        <div className="h-2 rounded-full bg-secondary/50 overflow-hidden">
-                          <div
-                            className="h-full bg-primary transition-all"
-                            style={{ width: `${Math.round(progress)}%` }}
-                          />
-                        </div>
-                        <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                          <span>{Math.round(progress)}%</span>
-                          <span>{progress === 100 ? "Complete" : "In progress"}</span>
-                        </div>
+                    <div className="pt-2">
+                      <p className="text-xs uppercase tracking-widest text-muted-foreground font-semibold mb-2">
+                        Your progress
+                      </p>
+                      <div className="h-2 rounded-full bg-secondary/50 overflow-hidden">
+                        <div
+                          className="h-full bg-primary transition-all"
+                          style={{ width: `${Math.round(progress)}%` }}
+                        />
                       </div>
+                      <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                        <span>{Math.round(progress)}%</span>
+                        <span>
+                          {progress === 100 ? "Complete" : "In progress"}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 ) : (
-                  <EnrollButton
-                    courseId={course.id}
-                    className="w-full justify-center"
-                  />
+                  isPaidCourse ? (
+                    <CourseAccessActions
+                      courseId={course.id}
+                      price={course.price}
+                      isEnrolled={false}
+                      userCredits={userCredits}
+                      userTradeCourses={userTradeCourses}
+                    />
+                  ) : (
+                    <EnrollButton
+                      courseId={course.id}
+                      className="w-full justify-center"
+                    />
+                  )
                 )
               ) : (
                 <Link

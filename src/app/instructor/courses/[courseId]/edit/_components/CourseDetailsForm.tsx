@@ -13,6 +13,7 @@ interface CourseDetailsFormProps {
     category: string | null;
     level: string | null;
     published: boolean;
+    price: number | null;
   };
 }
 
@@ -35,6 +36,7 @@ export function CourseDetailsForm({ course }: CourseDetailsFormProps) {
   const [category, setCategory] = useState(course.category || "General");
   const [level, setLevel] = useState(course.level || "BEGINNER");
   const [published, setPublished] = useState(!!course.published);
+  const [price, setPrice] = useState(course.price === 50 ? 50 : 0);
   const [saving, setSaving] = useState(false);
 
   const onSave = async (e: React.FormEvent) => {
@@ -46,6 +48,7 @@ export function CourseDetailsForm({ course }: CourseDetailsFormProps) {
         description,
         category,
         level,
+        price,
         published,
       });
       router.refresh();
@@ -118,6 +121,31 @@ export function CourseDetailsForm({ course }: CourseDetailsFormProps) {
             ))}
           </select>
         </div>
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+          Pricing
+        </label>
+        <div className="grid grid-cols-2 gap-3">
+          {[0, 50].map((value) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setPrice(value)}
+              className={`px-4 py-3 rounded-xl border text-sm font-semibold transition-all ${
+                price === value
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-white/10 bg-black/30 text-gray-300 hover:border-primary/40"
+              }`}
+            >
+              {value === 0 ? "Free" : "50 Credits"}
+            </button>
+          ))}
+        </div>
+        <p className="text-xs text-gray-400">
+          Courses can be Free or priced at 50 credits. Only published courses are eligible for trades.
+        </p>
       </div>
 
       <label className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-xl px-4 py-3 cursor-pointer">

@@ -95,6 +95,8 @@ export async function PUT(
     }
 
     // Update course
+    const normalizedPrice = body.price === 50 ? 50 : 0
+
     const updatedCourse = await prisma.course.update({
       where: { id: courseId },
       data: {
@@ -102,7 +104,7 @@ export async function PUT(
         description: body.description,
         category: body.category,
         level: body.level,
-        price: body.price,
+        price: normalizedPrice,
         thumbnail: body.thumbnail,
         published: body.published
       }

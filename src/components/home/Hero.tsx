@@ -42,7 +42,7 @@ export function Hero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.8 }}
             >
-              Learn Without
+              For the Students
               <motion.span
                 className="block gradient-text"
                 animate={{
@@ -51,7 +51,7 @@ export function Hero() {
                 transition={{ duration: 5, repeat: Infinity }}
                 style={{ backgroundSize: "200% 200%" }}
               >
-                Limits
+                By the Students
               </motion.span>
             </motion.h1>
 
@@ -64,7 +64,7 @@ export function Hero() {
             >
               Access thousands of courses, code repositories, and learning
               materials crafted by industry experts. Master new skills at your
-              own pace.
+              own pace. Made by learners like yourself.
             </motion.p>
 
             {/* CTA Buttons */}

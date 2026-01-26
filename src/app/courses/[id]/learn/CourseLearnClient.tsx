@@ -80,7 +80,8 @@ export function CourseLearnClient({
           </div>
         ) : (
           <div className="rounded-2xl border border-border/60 bg-secondary/20 p-6 text-center text-muted-foreground">
-            No videos available yet. Check materials below and try the exercises link.
+            No videos available yet. Check materials below and try the exercises
+            link.
           </div>
         )}
       </div>
@@ -207,7 +208,8 @@ export function CourseLearnClient({
                     Go to exercises
                   </p>
                   <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
-                    {exercises.length} question{exercises.length === 1 ? "" : "s"}
+                    {exercises.length} question
+                    {exercises.length === 1 ? "" : "s"}
                   </p>
                   <div className="space-y-1">
                     {exercises.slice(0, 3).map((ex) => (

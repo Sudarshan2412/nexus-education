@@ -71,10 +71,7 @@ export default async function CourseExercisesPage({
         ) : (
           <div className="space-y-4">
             {course.exercises.map((ex) => (
-              <div
-                key={ex.id}
-                className="glass-card p-4 sm:p-6 space-y-3"
-              >
+              <div key={ex.id} className="glass-card p-4 sm:p-6 space-y-3">
                 <div className="flex items-start justify-between gap-3">
                   <div className="space-y-1">
                     <p className="text-base font-semibold text-foreground">

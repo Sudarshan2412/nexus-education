@@ -63,6 +63,10 @@ export default async function ProfilePage() {
               <span className="inline-block px-4 py-1.5 bg-brand-blue/10 text-brand-blue border border-brand-blue/20 rounded-full text-[10px] font-bold uppercase tracking-widest">
                 {user.role}
               </span>
+              <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/5 text-sm font-semibold text-white">
+                <User className="w-4 h-4" />
+                {user.credits} credits
+              </div>
             </div>
           </div>
         </div>
@@ -102,52 +106,50 @@ export default async function ProfilePage() {
           </div>
         </div>
 
-        {/* Created Courses (Only for Instructors) */}
-        {(user.role === 'INSTRUCTOR' || user.role === 'ADMIN') && (
-          <div>
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <GraduationCap className="w-6 h-6 text-brand-blue" />
-                <h2 className="text-xl font-bold uppercase tracking-widest text-gray-400">
-                  My Courses
-                </h2>
-              </div>
-              <Link
-                href="/instructor/courses/new"
-                className="flex items-center gap-2 px-6 py-3 bg-brand-blue hover:bg-blue-600 text-white rounded-full transition-all button-glow font-bold uppercase tracking-wider text-sm"
-              >
-                <Plus className="w-4 h-4" />
-                Create Course
-              </Link>
+        {/* Created Courses */}
+        <div>
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <GraduationCap className="w-6 h-6 text-brand-blue" />
+              <h2 className="text-xl font-bold uppercase tracking-widest text-gray-400">
+                My Courses
+              </h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {user.coursesCreated.length > 0 ? (
-                user.coursesCreated.map((course: any) => (
-                  <CourseCard key={course.id} {...course} />
-                ))
-              ) : (
-                <div className="col-span-full glass-card p-12 text-center">
-                  <div className="w-20 h-20 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                    <GraduationCap className="w-10 h-10 text-gray-600" />
-                  </div>
-                  <h3 className="text-2xl font-bold uppercase tracking-tight text-white mb-2">
-                    No Courses Created
-                  </h3>
-                  <p className="text-gray-400 mb-6 text-sm">
-                    You haven&apos;t created any courses yet.
-                  </p>
-                  <Link
-                    href="/instructor/courses/new"
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-brand-blue hover:bg-blue-600 text-white rounded-full transition-all button-glow font-bold uppercase tracking-wider text-sm"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Create Course
-                  </Link>
-                </div>
-              )}
-            </div>
+            <Link
+              href="/instructor/courses/new"
+              className="flex items-center gap-2 px-6 py-3 bg-brand-blue hover:bg-blue-600 text-white rounded-full transition-all button-glow font-bold uppercase tracking-wider text-sm"
+            >
+              <Plus className="w-4 h-4" />
+              Create Course
+            </Link>
           </div>
-        )}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {user.coursesCreated.length > 0 ? (
+              user.coursesCreated.map((course: any) => (
+                <CourseCard key={course.id} {...course} />
+              ))
+            ) : (
+              <div className="col-span-full glass-card p-12 text-center">
+                <div className="w-20 h-20 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                  <GraduationCap className="w-10 h-10 text-gray-600" />
+                </div>
+                <h3 className="text-2xl font-bold uppercase tracking-tight text-white mb-2">
+                  No Courses Created
+                </h3>
+                <p className="text-gray-400 mb-6 text-sm">
+                  You haven&apos;t created any courses yet.
+                </p>
+                <Link
+                  href="/instructor/courses/new"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-brand-blue hover:bg-blue-600 text-white rounded-full transition-all button-glow font-bold uppercase tracking-wider text-sm"
+                >
+                  <Plus className="w-4 h-4" />
+                  Create Course
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </main>
   )

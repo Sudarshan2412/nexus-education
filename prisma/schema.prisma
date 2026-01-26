@@ -15,6 +15,7 @@ model User {
   image         String?
   password      String?
   role          Role      @default(STUDENT)
+  credits       Int       @default(50)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -27,6 +28,11 @@ model User {
   reviews       Review[]
   certificates  Certificate[]
   payments      Payment[]
+  tradesRequested CourseTrade[] @relation("TradeRequester")
+  tradesReceived  CourseTrade[] @relation("TradeRecipient")
+  bountiesCreated Bounty[]      @relation("BountyCreator")
+  bountiesFulfilled Bounty[]    @relation("BountyFulfiller")
+  bountyNotifications BountyNotification[]
 }
 
 model Account {
@@ -71,7 +77,7 @@ model Course {
   thumbnail   String?
   category    String
   level       Level    @default(BEGINNER)
-  price       Float    @default(0)
+  price       Float    @default(0) // Only 0 or 50 credits
   published   Boolean  @default(false)
   instructorId String
   createdAt   DateTime @default(now())
@@ -86,6 +92,9 @@ model Course {
   reviews     Review[]
   certificates Certificate[]
   payments    Payment[]
+  tradesAsRequester CourseTrade[] @relation("RequesterCourse")
+  tradesAsRecipient CourseTrade[] @relation("RecipientCourse")
+  fulfilledBounties  Bounty[] @relation("FulfilledCourse")
 }
 
 model Video {
@@ -253,6 +262,75 @@ model Payment {
 
   @@index([userId])
   @@index([courseId])
+}
+
+model CourseTrade {
+  id                 String      @id @default(cuid())
+  requesterId        String
+  requesterCourseId  String
+  recipientId        String
+  recipientCourseId  String
+  status             TradeStatus @default(PENDING)
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+
+  requester          User   @relation("TradeRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  recipient          User   @relation("TradeRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  requesterCourse    Course @relation("RequesterCourse", fields: [requesterCourseId], references: [id], onDelete: Cascade)
+  recipientCourse    Course @relation("RecipientCourse", fields: [recipientCourseId], references: [id], onDelete: Cascade)
+
+  @@index([requesterId])
+  @@index([recipientId])
+  @@index([requesterCourseId])
+  @@index([recipientCourseId])
+  @@unique([requesterCourseId, recipientCourseId, requesterId, recipientId, status])
+}
+
+model Bounty {
+  id                String       @id @default(cuid())
+  title             String
+  description       String?
+  amount            Int
+  status            BountyStatus @default(OPEN)
+  createdById       String
+  fulfilledById     String?
+  fulfilledCourseId String?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  createdBy        User   @relation("BountyCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  fulfilledBy      User?  @relation("BountyFulfiller", fields: [fulfilledById], references: [id])
+  fulfilledCourse  Course? @relation("FulfilledCourse", fields: [fulfilledCourseId], references: [id])
+  notifications    BountyNotification[]
+
+  @@index([status])
+  @@index([createdById])
+}
+
+model BountyNotification {
+  id         String   @id @default(cuid())
+  userId     String
+  bountyId   String
+  seen       Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bounty Bounty @relation(fields: [bountyId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([seen])
+  @@index([createdAt])
+}
+
+enum TradeStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+enum BountyStatus {
+  OPEN
+  CLOSED
 }
 
 enum PaymentStatus {
